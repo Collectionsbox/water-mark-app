@@ -1,0 +1,14 @@
+.container {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 120px;
+    bottom: 120px;
+    margin: auto;
+}
+
+.edit {
+    border: 1px #000000 solid;
+    object-fit: contain;
+    height: 100%;
+}

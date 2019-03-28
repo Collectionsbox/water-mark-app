@@ -1,7 +1,7 @@
 import React, {Component, Fragment} from 'react'
 import {connect} from 'react-redux'
-import {addEditImageAction} from '../redux/actions/EditAction'
-import FileInput from '../components/common/FileInput'
+import {addEditImageAction, addWMImageAction} from '../redux/actions/EditAction'
+import FileInput from './common/FileInput'
 
 class Resource extends Component{
 
@@ -23,10 +23,14 @@ class Resource extends Component{
         this.wmImage.triggerClick();
     };
     bgDataChange = (e) => {
-        this.props.addEditImage(URL.createObjectURL(e.target.files[0]));
+        if (e.target.files[0]) {
+            this.props.addEditImage(URL.createObjectURL(e.target.files[0]));
+        }
     };
     wmDataChange = (e) => {
-
+        if (e.target.files[0]) {
+            this.props.addWMImage(URL.createObjectURL(e.target.files[0]));
+        }
     };
 }
 
@@ -36,8 +40,11 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        addEditImage: (data) => {
+        addEditImage: function (data) {
             dispatch(addEditImageAction(data));
+        },
+        addWMImage: function (data) {
+            dispatch(addWMImageAction(data));
         },
     }
 };

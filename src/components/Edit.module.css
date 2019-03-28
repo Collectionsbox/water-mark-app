@@ -1,14 +1,13 @@
-.container {
+.container, .container canvas {
     position: absolute;
     left: 0;
     right: 0;
-    top: 120px;
-    bottom: 120px;
+    top: 0;
+    bottom: 0;
     margin: auto;
 }
 
 .edit {
     border: 1px #000000 solid;
     object-fit: contain;
-    height: 100%;
 }

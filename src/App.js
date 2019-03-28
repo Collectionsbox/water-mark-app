@@ -2,12 +2,16 @@ import React, { Component } from 'react';
 import './App.css';
 import './normalize.css';
 import {Provider} from 'react-redux'
-import {createStore} from 'redux'
 import rootReducer from './redux/reducers/root.reducer'
 import Edit from './components/Edit'
-import Resource from './containers/Resource'
+import Resource from './components/Resource'
+import { createStore, applyMiddleware } from 'redux'
+import thunk from 'redux-thunk'
 
-const store = createStore(rootReducer);
+const store = createStore(
+    rootReducer,
+    applyMiddleware(thunk)
+);
 
 class App extends Component {
   render() {

@@ -1,14 +1,18 @@
 import React, {Component} from 'react'
 import style from './Edit.module.css'
 import {connect} from 'react-redux'
+import {initEditViewAction, redrawAction, dropAction, dragAction} from '../redux/actions/EditAction'
 import Util from '../util/Util'
 
 class Edit extends Component{
     constructor(props) {
         super(props);
-        this.isMouseDown = false;
         this.point = {x: 0, y: 0};
     }
+    componentDidMount() {
+        this.props.initEditView(this.editCanvas);
+    }
+
     componentDidUpdate(prevProps, prevState, snapshot) {
         let {editImage} = this.props;
         if (editImage && editImage !== prevProps.editImage) {
@@ -17,14 +21,14 @@ class Edit extends Component{
     }
 
     render() {
-        let {size={width: 500, height: 500}} = this.props;
+        let {size} = this.props;
         return (
-            <div className={style.container}
-                 ref={ele => this.container = ele}
-                 onMouseDown={this.mouseDown}
-                 onMouseMove={this.mouseMove}
-            >
+            <div  style={{width: size.width, height: size.height}}
+                  ref={ele => this.container = ele}
+                  onMouseDown={this.mouseDown}
+                  className={style.container}>
                 <canvas ref={ele => this.editCanvas = ele}
+                        style={{width: size.width, height: size.height}}
                         className={style.edit}
                         width={size.width}
                         height={size.height}>
@@ -34,30 +38,38 @@ class Edit extends Component{
     }
 
     mouseDown = (e) => {
-        this.isMouseDown = true;
-        this.container.addEventListener('mousemove', this.mouseMove);
-        this.initPoint(e);
+        this.point = this.getPoint(e);
+        Util.addEvent(document.body, 'mousemove', this.mouseMove);
+        Util.addEvent(document.body, 'mouseup', this.mouseUp);
+        this.props.mouseDownInCanvas(this.point);
     };
     mouseUp = (e) => {
-        this.isMouseDown =false;
-        this.container.removeEventListener('mousemove', this.mouseMove);
+        Util.removeEvent(document.body, 'mousemove', this.mouseMove);
+        Util.removeEvent(document.body, 'mouseup', this.mouseUp);
     };
     mouseMove = (e) => {
-        this.initPoint(e);
+        let point = this.getPoint(e);
+        let offset = {
+            x: point.x - this.point.x,
+            y: point.y - this.point.y,
+        };
+        this.props.mouseMoveInCanvas(offset);
+        this.point = point;
     };
-    initPoint = (e) => {
-        let {left, top} = this.container.getBoundingClientRect();
-        this.point.x = left - e.clientX;
-        this.point.y = top - e.clientY;
+    getPoint = (e) => {
+        let {left, top} = this.editCanvas.getBoundingClientRect();
+        return {
+            x: e.clientX - left,
+            y: e.clientY - top,
+        };
     };
     drawEditImage = () => {
         let {editImage} = this.props;
         let ctx = this.editCanvas.getContext('2d');
         Util.getImageInfo(editImage, (info) => {
-            let {width, height, image} = info;
-            this.editCanvas.width = width;
-            this.editCanvas.height = height;
-            ctx.drawImage(image, 0, 0, width, height);
+            let {image} = info;
+            ctx.drawImage(image, 0, 0, this.editCanvas.width, this.editCanvas.height);
+            this.props.redraw();
         })
     };
 }
@@ -65,12 +77,23 @@ class Edit extends Component{
 const mapStateToProps = (state) => {
     return {
         size: state.edit.size,
-        editImage: state.resource.editImage,
+        editImage: state.edit.editImage,
     }
 };
 const mapDispatchToProps = (dispatch) => {
     return {
-
+        initEditView: function (canvas) {
+            dispatch(initEditViewAction(canvas));
+        },
+        redraw: function () {
+            dispatch(redrawAction());
+        },
+        mouseDownInCanvas: function (point) {
+            dispatch(dropAction(point));
+        },
+        mouseMoveInCanvas: function (offset) {
+            dispatch(dragAction(offset));
+        },
     }
 };
 

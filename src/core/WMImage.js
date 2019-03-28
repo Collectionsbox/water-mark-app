@@ -1,12 +1,12 @@
-import Sprite from 'Sprite'
+import Sprite from './Sprite'
 
-class Image extends Sprite{
+class WMImage extends Sprite{
     constructor(props) {
         super(props);
         this.blobUrl = '';
         this.image = new Image();
     }
-    setSource (blobUrl, callback) {
+    setSource (blobUrl, success, error) {
         this.blobUrl = blobUrl;
         this.image.addEventListener('load', () => {
             if (this.relativeRect) {
@@ -15,8 +15,14 @@ class Image extends Sprite{
                 this.relativeRect.h = this.relativeRect.w / r;
                 this.relativeRect.y -= this.relativeRect.h - oriH;
             }
-            if (callback) {
-                callback();
+            if (success) {
+                success();
+            }
+        });
+        this.image.addEventListener('error', () => {
+            console.log('not support');
+            if (error) {
+                error();
             }
         });
         this.image.src = this.blobUrl;
@@ -27,7 +33,10 @@ class Image extends Sprite{
     draw (canvas) {
         let {width, height} = canvas;
         if (!this.relativeRect) {
-            this.initRelativeRect({width: width, height: height});
+            this.initRelativeRect(
+                {width: width, height: height},
+                {width: this.image.naturalWidth, height: this.image.naturalHeight},
+            );
         }
         let ctx = canvas.getContext('2d');
         let posX = this.relativeRect.x * width;
@@ -36,14 +45,6 @@ class Image extends Sprite{
         let sizeH = this.relativeRect.h * height;
         ctx.drawImage(this.image, posX, posY, sizeW, sizeH);
     }
-    initRelativeRect (viewSize) {
-        let {width, height} = viewSize;
-        let r = this.image.clientWidth / this.image.clientHeight;
-        this.relativeRect.w = 0.5;
-        this.relativeRect.h = width * this.relativeRect.w / r / height;
-        this.relativeRect.x = (1 - this.relativeRect.w) / 2;
-        this.relativeRect.y = (1 - this.relativeRect.h) / 2;
-    }
 }
 
-export default Image;
+export default WMImage;

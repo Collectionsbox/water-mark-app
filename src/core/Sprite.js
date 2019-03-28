@@ -1,7 +1,7 @@
 class Sprite {
     constructor() {
         this.selected = false;
-        this.relativeRect = {w: 0, h: 0, x: 0, y: 0};
+        this.relativeRect = null;
         this.rotation = 0;
         this.layerIndex = 1;
         //trackNode
@@ -127,6 +127,40 @@ class Sprite {
     }
     setLayerIndex (index) {
         this.layerIndex = index;
+    }
+    initRelativeRect (viewSize, selfSize) {
+        let {width, height} = viewSize;
+        this.relativeRect = {};
+        let r = selfSize.width / selfSize.height;
+        this.relativeRect.w = 0.5;
+        this.relativeRect.h = width * this.relativeRect.w / r / height;
+        this.relativeRect.x = (1 - this.relativeRect.w) / 2;
+        this.relativeRect.y = (1 - this.relativeRect.h) / 2;
+    }
+    getRect (viewSize) {
+        let {x, y, w, h} = this.relativeRect;
+        let {width, height} = viewSize;
+        return {
+            x: x * width,
+            y: y * height,
+            width: w * width,
+            height: h * height,
+        }
+    }
+
+    //改变ViewSize后，将Sprite的relativeRect以中心点自适应, 宽度不变
+    updateRelativeRect (viewSize, selfSize) {
+        let {x, y, w, h} = this.relativeRect;
+        let newRelativeRect = {w: w};
+        let oldCenterPoint = {
+            x: x + w / 2,
+            y: y + h / 2,
+        };
+        let r = selfSize.width / selfSize.height;
+        newRelativeRect.h =  viewSize.width * w / r / viewSize.height;
+        newRelativeRect.x = oldCenterPoint.x - newRelativeRect.w / 2;
+        newRelativeRect.y = oldCenterPoint.y - newRelativeRect.h / 2;
+        this.relativeRect = newRelativeRect;
     }
 }
 

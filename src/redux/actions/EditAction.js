@@ -19,9 +19,10 @@ export const addWMImageAction = blobUrl => ({
     blobUrl: blobUrl,
 });
 
-export const initEditViewAction = canvas => ({
+export const initEditViewAction = (canvas, trackView) => ({
     type: ActionType.INIT_EDIT_VIEW,
     canvas: canvas,
+    trackView: trackView,
 });
 
 export const redrawAction = () => {
@@ -40,5 +41,30 @@ export const dragAction = (offset) => {
     return {
         type: ActionType.EDIT_DRAG,
         offset: offset,
+    }
+};
+
+export const upAction = () => {
+    return {
+        type: ActionType.EDIT_UP
+    }
+};
+
+export const overAction = (point) => {
+    return {
+        type: ActionType.EDIT_OVER,
+        point: point,
+    }
+};
+
+export const deleteSelectedSpriteAction = () => {
+    return {
+        type: ActionType.DELETE_SELECTED_SPRITE,
+    }
+};
+
+export const exportAction = () => {
+    return {
+        type: ActionType.EXPORT,
     }
 };

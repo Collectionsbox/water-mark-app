@@ -10,6 +10,7 @@ export default (state = initState, action) => {
     switch (action.type) {
         case ActionType.INIT_EDIT_VIEW: {
             Store.initView(action.canvas);
+            Store.initTrackView(action.trackView);
             return state;
         }
         case ActionType.ADD_WM_IMAGE: {
@@ -44,6 +45,22 @@ export default (state = initState, action) => {
         }
         case ActionType.EDIT_DRAG: {
             Store.dragInCanvas(action.offset);
+            return state;
+        }
+        case ActionType.EDIT_UP: {
+            Store.dropUpCanvas();
+            return state;
+        }
+        case ActionType.EDIT_OVER: {
+            Store.overCanvas(action.point);
+            return state;
+        }
+        case ActionType.DELETE_SELECTED_SPRITE: {
+            Store.deleteWM();
+            return state;
+        }
+        case ActionType.EXPORT: {
+            Store.export();
             return state;
         }
         default:

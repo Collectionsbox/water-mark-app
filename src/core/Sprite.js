@@ -1,31 +1,11 @@
+import Track from './Track'
+
 class Sprite {
     constructor() {
-        this.selected = false;
         this.relativeRect = null;
         this.rotation = 0;
         this.layerIndex = 1;
-        //trackNode
-        //-1 => not selected
-        //0 =>  left-top
-        //1 =>  top
-        //2 =>  right-top
-        //3 =>  right
-        //4 =>  right-bottom
-        //5 =>  bottom
-        //6 =>  left-bottom
-        //7 =>  left
-        //8 =>  selected
-        this.trackNode = -1;
-    }
-
-    select () {
-        this.selected = true;
-    }
-    deselect () {
-        this.selected = false;
-    }
-    isSelected () {
-        return this.selected;
+        this.track = new Track();
     }
     getRelativeRect () {
         return this.relativeRect;
@@ -46,12 +26,12 @@ class Sprite {
         this.relativeRect.x += offsetPoint.x;
         this.relativeRect.y += offsetPoint.y;
     }
-    resize (offsetPoint, keepRatio = true) {
+    resize (trackNode, offsetPoint, keepRatio = true) {
         let {x, y} = offsetPoint;
         let r = this.relativeRect.w / this.relativeRect.h;
         let oriW = this.relativeRect.w;
         let oriH = this.relativeRect.h;
-        switch (this.trackNode) {
+        switch (trackNode) {
             case 0: {
                 let isAdd = (x < 0 || (x === 0 && y > 0));
                 if (keepRatio) {
@@ -59,15 +39,15 @@ class Sprite {
                     this.relativeRect.h = this.relativeRect.w / r;
                 } else {
                     this.relativeRect.w -= x;
-                    this.relativeRect.h += y;
+                    this.relativeRect.h -= y;
                 }
                 this.relativeRect.x -= (this.relativeRect.w - oriW);
                 this.relativeRect.y -= (this.relativeRect.h - oriH);
                 break;
             }
             case 1: {
-                this.relativeRect.h += y;
-                this.relativeRect.y -= y;
+                this.relativeRect.h -= y;
+                this.relativeRect.y += y;
                 break;
             }
             case 2: {
@@ -93,12 +73,12 @@ class Sprite {
                     this.relativeRect.h = this.relativeRect.w / r;
                 } else {
                     this.relativeRect.w += x;
-                    this.relativeRect.h -= y;
+                    this.relativeRect.h += y;
                 }
                 break;
             }
             case 5: {
-                this.relativeRect.h -= y;
+                this.relativeRect.h += y;
                 break;
             }
             case 6: {
@@ -107,15 +87,15 @@ class Sprite {
                     this.relativeRect.w += isAdd ? Math.abs(x) : -Math.abs(x);
                     this.relativeRect.h = this.relativeRect.w / r;
                 } else {
-                    this.relativeRect.w += x;
-                    this.relativeRect.h -= y;
+                    this.relativeRect.w -= x;
+                    this.relativeRect.h += y;
                 }
-                this.relativeRect.x -= x;
+                this.relativeRect.x += x;
                 break;
             }
             case 7: {
                 this.relativeRect.w -= x;
-                this.relativeRect.x -= x;
+                this.relativeRect.x += x;
                 break;
             }
             default:
@@ -146,6 +126,18 @@ class Sprite {
             width: w * width,
             height: h * height,
         }
+    }
+    drawTrack (view, withNode, activeNode) {
+        this.track.draw(view, this.relativeRect, this.rotation, withNode, activeNode);
+    }
+    delete () {
+        this.track.clear();
+    }
+    clearTrack () {
+        this.track.clear();
+    }
+    trackNodePoint (view, point) {
+        return this.track.nodePoint(view, this.relativeRect, this.rotation, point);
     }
 
     //改变ViewSize后，将Sprite的relativeRect以中心点自适应, 宽度不变

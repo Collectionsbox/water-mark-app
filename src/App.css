@@ -31,6 +31,10 @@ html, body {
   color: white;
 }
 
+* {
+  box-sizing: border-box;
+}
+
 .App-link {
   color: #61dafb;
 }

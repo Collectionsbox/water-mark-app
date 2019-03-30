@@ -1,12 +1,13 @@
-import Util from '../util/Util'
+import Track from './Track'
 
 class Canvas {
     constructor () {
         this.sprites = [];
         this.selectedIndex = -1;
-        this.size = {width: 1, height: 1};
         this.canvas = document.createElement('canvas');
         this.context = this.canvas.getContext('2d');
+        this.trackView = null;
+        this.trackNode = -1;
     }
 
     getCanvas () {
@@ -16,7 +17,6 @@ class Canvas {
         return this.context;
     }
     setSize (size) {
-        this.size = {...size};
         this.canvas.width = size.width;
         this.canvas.height = size.height;
     }
@@ -44,27 +44,74 @@ class Canvas {
         sprite.draw(this.canvas);
     }
     addSprite (sprite) {
-        this.selectedIndex = this.sprites.push(sprite) - 1;
+        this.sprites.push(sprite);
     }
     deleteSpite () {
+        this.sprites[this.selectedIndex].delete();
         this.sprites.splice(this.selectedIndex, 1);
-        this.selectedIndex = this.sprites.length - 1;
     }
     drop (point) {
-        this.selectedIndex = this.sprites.findIndex((sprite) => {
-            return Util.isPointInRect(point, sprite.getRect(this.getSize()));
-        });
-        console.log(this.selectedIndex);
+        this.selectedIndex = -1;
+        let hasFound = false;
+        for (let i = this.sprites.length - 1; i > -1; i--) {
+            let sprite = this.sprites[i];
+            sprite.clearTrack();
+            if (!hasFound) {
+                this.trackNode = sprite.trackNodePoint(this.trackView, point);
+                if (this.trackNode !== -1) {
+                    this.selectedIndex = i;
+                    hasFound = true;
+                }
+            }
+        }
+        if (hasFound) {
+            this.sprites[this.selectedIndex].drawTrack(this.trackView, true, this.trackNode);
+        }
+    }
+    dropUp () {
+        this.trackNode = -1;
         if (this.selectedIndex !== -1) {
-            // let selectedSprite = this.sprites[this.selectedIndex];
+            this.sprites[this.selectedIndex].drawTrack(this.trackView, true, this.trackNode);
         }
     }
     drag (offset) {
         if (this.selectedIndex !== -1) {
-            let selectedSp = this.sprites[this.selectedIndex];
             let {width, height} = this.getSize();
-            selectedSp.move({x: offset.x / width, y: offset.y / height});
+            let offsetPoint = {x: offset.x / width, y: offset.y / height};
+            let selectedSp = this.sprites[this.selectedIndex];
+            if (this.trackNode === Track.Track_NODE.CENTER) {
+                selectedSp.move(offsetPoint);
+            } else if (this.trackNode !== Track.Track_NODE.NONE) {
+                selectedSp.resize(this.trackNode, offsetPoint);
+            }
+            selectedSp.drawTrack(this.trackView, true, this.trackNode);
         }
+    }
+    mouseOver (point) {
+        let overSprite = null;
+        let hasFound = false;
+        this.sprites.forEach((sprite, index) => {
+            if (index !== this.selectedIndex) {
+                sprite.clearTrack();
+            }
+        });
+        for (let i = this.sprites.length - 1; i > -1; i--) {
+            let sprite = this.sprites[i];
+            this.trackNode = sprite.trackNodePoint(this.trackView, point);
+            if (this.selectedIndex === i && this.trackNode !== -1) {
+                break;
+            }
+            if (!hasFound && this.trackNode !== -1) {
+                overSprite = sprite;
+                hasFound = true;
+            }
+        }
+        if (overSprite) {
+            overSprite.drawTrack(this.trackView, false, -1);
+        }
+    }
+    initTrackView (view) {
+        this.trackView = view;
     }
 }
 

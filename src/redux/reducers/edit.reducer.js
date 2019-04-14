@@ -17,6 +17,10 @@ export default (state = initState, action) => {
             Store.addWMImage(action.blobUrl);
             return state;
         }
+        case ActionType.ADD_WM_TEXT: {
+            Store.addWMText();
+            return state;
+        }
         case ActionType.ADD_EDIT_IMAGE: {
             let {width, height} = action.editImageSize;
             let r = width / height;

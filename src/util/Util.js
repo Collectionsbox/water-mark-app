@@ -33,5 +33,8 @@ export default {
     },
     distancePoint: function (point) {
         return Math.sqrt((Math.pow(point.x, 2) + Math.pow(point.y, 2)));
-    }
+    },
+    getTextHeight: function () {
+
+    },
 }

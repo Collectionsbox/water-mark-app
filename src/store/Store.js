@@ -1,5 +1,6 @@
 import Canvas from '../core/Canvas'
 import WMImage from '../core/WMImage'
+import WMText from '../core/WMText'
 
 let canvas = new Canvas();
 let editCanvas = null;
@@ -23,11 +24,21 @@ export default {
     },
     addWMImage: function (src) {
         let image = new WMImage();
-        image.setSource(src, () => {
-            canvas.addSprite(image);
-            canvas.drawSprite(image);
-            canvas.draw();
-        });
+        image.setSource(src)
+            .then(() => {
+                canvas.addSprite(image);
+                canvas.drawSprite(image);
+                canvas.draw();
+            })
+            .catch(() => {
+                console.log('not support this image');
+            });
+    },
+    addWMText: function () {
+        let text = new WMText({text: 'Please Enter Text'});
+        canvas.addSprite(text);
+        canvas.drawSprite(text);
+        canvas.draw();
     },
     deleteWM: function () {
         canvas.deleteSpite();

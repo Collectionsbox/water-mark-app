@@ -19,6 +19,10 @@ export const addWMImageAction = blobUrl => ({
     blobUrl: blobUrl,
 });
 
+export const addWMTextAction = blobUrl => ({
+    type: ActionType.ADD_WM_TEXT,
+});
+
 export const initEditViewAction = (canvas, trackView) => ({
     type: ActionType.INIT_EDIT_VIEW,
     canvas: canvas,

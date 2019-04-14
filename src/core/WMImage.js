@@ -6,26 +6,24 @@ class WMImage extends Sprite{
         this.blobUrl = '';
         this.image = new Image();
     }
-    setSource (blobUrl, success, error) {
+    setSource (blobUrl) {
         this.blobUrl = blobUrl;
-        this.image.addEventListener('load', () => {
-            if (this.relativeRect) {
-                let r = this.image.clientWidth / this.image.clientHeight;
-                let oriH = this.relativeRect.h;
-                this.relativeRect.h = this.relativeRect.w / r;
-                this.relativeRect.y -= this.relativeRect.h - oriH;
-            }
-            if (success) {
-                success();
-            }
+        return new Promise ((resolve, reject) => {
+            this.image.addEventListener('load', () => {
+                if (this.relativeRect) {
+                    let r = this.image.clientWidth / this.image.clientHeight;
+                    let oriH = this.relativeRect.h;
+                    this.relativeRect.h = this.relativeRect.w / r;
+                    this.relativeRect.y -= this.relativeRect.h - oriH;
+                }
+                resolve();
+            });
+            this.image.addEventListener('error', () => {
+                console.log('not support');
+                reject();
+            });
+            this.image.src = this.blobUrl;
         });
-        this.image.addEventListener('error', () => {
-            console.log('not support');
-            if (error) {
-                error();
-            }
-        });
-        this.image.src = this.blobUrl;
     }
     getSource () {
         return this.blobUrl;

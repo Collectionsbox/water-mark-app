@@ -1,6 +1,6 @@
 import React, {Component, Fragment} from 'react'
 import {connect} from 'react-redux'
-import {addEditImageAction, addWMImageAction, exportAction} from '../redux/actions/EditAction'
+import {addEditImageAction, addWMImageAction, exportAction, addWMTextAction} from '../redux/actions/EditAction'
 import FileInput from './common/FileInput'
 
 class Resource extends Component{
@@ -9,7 +9,8 @@ class Resource extends Component{
         return (
             <Fragment>
                 <button onClick={this.bgHandleClick}>添加圖片</button>
-                <button onClick={this.wmHandleClick}>添加圖片水印</button>
+                <button onClick={this.imageHandle}>添加圖片水印</button>
+                <button onClick={this.textHandle}>添加文字水印</button>
                 <button onClick={this.export}>导出</button>
                 <FileInput ref={ele => this.bgImage = ele} accept='image/*' dataChange={this.bgDataChange}/>
                 <FileInput ref={ele => this.wmImage = ele} accept='image/*' dataChange={this.wmDataChange}/>
@@ -20,8 +21,11 @@ class Resource extends Component{
     bgHandleClick = () => {
         this.bgImage.triggerClick();
     };
-    wmHandleClick = () => {
+    imageHandle = () => {
         this.wmImage.triggerClick();
+    };
+    textHandle = () => {
+        this.props.addWMText();
     };
     bgDataChange = (e) => {
         if (e.target.files[0]) {
@@ -49,6 +53,9 @@ const mapDispatchToProps = (dispatch) => {
         },
         addWMImage: function (data) {
             dispatch(addWMImageAction(data));
+        },
+        addWMText: function () {
+            dispatch(addWMTextAction());
         },
         exportImage: function () {
             dispatch(exportAction());

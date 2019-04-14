@@ -10,6 +10,7 @@ import {
     deleteSelectedSpriteAction
 } from '../redux/actions/EditAction'
 import Util from '../util/Util'
+import MouseEvent from './common/MouseEvent'
 
 class Edit extends Component{
     constructor(props) {
@@ -19,11 +20,9 @@ class Edit extends Component{
     }
     componentDidMount() {
         this.props.initEditView(this.editCanvas, this.trackView);
-        Util.addEvent(document.body, 'mousemove', this.mouseMove);
         Util.addEvent(document.body, 'keydown', this.keyDown);
     }
     componentWillMount() {
-        Util.removeEvent(document.body, 'mousemove', this.mouseMove);
         Util.removeEvent(document.body, 'keydown', this.keyDown);
     }
 
@@ -35,62 +34,43 @@ class Edit extends Component{
     }
 
     render() {
-        let {size} = this.props;
+        let {
+            size,
+            mouseDownInCanvas,
+            mouseOverInCanvas,
+            mouseMoveInCanvas,
+        } = this.props;
         return (
             <div  style={{width: size.width, height: size.height}}
-                  ref={ele => this.container = ele}
-                  onMouseDown={this.mouseDown}
                   className={style.container}>
-                <div className={style.editContent}
-                     style={{width: size.width, height: size.height}}>
-                    <canvas ref={ele => this.editCanvas = ele}
-                            style={{width: size.width, height: size.height}}
-                            className={style.edit}
-                            width={size.width}
-                            height={size.height}>
-                    </canvas>
-                </div>
+                <MouseEvent mouseDown={mouseDownInCanvas}
+                            mouseOver={mouseOverInCanvas}
+                            mouseDrag={mouseMoveInCanvas}
+                            className={style.mouseContent}
+                >
+                    {() => {
+                        return (
+                            <div className={style.editContent}
+                                 style={{width: size.width, height: size.height}}>
+                                <canvas ref={ele => this.editCanvas = ele}
+                                        style={{width: size.width, height: size.height}}
+                                        className={style.edit}
+                                        width={size.width}
+                                        height={size.height}>
+                                </canvas>
+                            </div>
+                        );
+                    }}
+                </MouseEvent>
                 <div ref={ele => this.trackView = ele}
                      className={style.trackView} />
             </div>
         );
     }
-
-    mouseDown = (e) => {
-        this.isMouseDown = true;
-        this.point = this.getPoint(e);
-        Util.addEvent(document.body, 'mouseup', this.mouseUp);
-        this.props.mouseDownInCanvas(this.point);
-    };
-    mouseUp = (e) => {
-        this.isMouseDown = false;
-        Util.removeEvent(document.body, 'mouseup', this.mouseUp);
-        this.props.mouseUpInCanvas();
-    };
-    mouseMove = (e) => {
-        let point = this.getPoint(e);
-        let offset = {
-            x: point.x - this.point.x,
-            y: point.y - this.point.y,
-        };
-        if (this.isMouseDown) {
-            this.props.mouseMoveInCanvas(offset);
-        } else {
-            this.props.mouseOverInCanvas(point);
-        }
-        this.point = point;
-    };
     keyDown = (e) => {
         if (e.key === 'Delete') {
             this.props.deleteSelectedSprite();
         }
-    };
-    getPoint = (e) => {
-        let {left, top} = this.editCanvas.getBoundingClientRect();
-        return {
-            x: e.clientX - left,
-            y: e.clientY - top,
-        };
     };
     drawEditImage = () => {
         let {editImage} = this.props;
@@ -120,8 +100,8 @@ const mapDispatchToProps = (dispatch) => {
         mouseDownInCanvas: function (point) {
             dispatch(dropAction(point));
         },
-        mouseMoveInCanvas: function (offset) {
-            dispatch(dragAction(offset));
+        mouseMoveInCanvas: function (point, offset) {
+            dispatch(dragAction(point, offset));
         },
         mouseUpInCanvas: function () {
             dispatch(upAction());

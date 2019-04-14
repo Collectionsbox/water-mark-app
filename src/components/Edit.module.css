@@ -8,7 +8,11 @@
     overflow: hidden;
 }
 
-.editContent {
+.trackView {
+    pointer-events: none;
+}
+
+.mouseContent, .editContent {
     position: absolute;
     left: 0;
     right: 0;

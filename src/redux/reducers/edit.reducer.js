@@ -2,7 +2,7 @@ import ActionType from "../../constants/ActionType";
 import Store from '../../store/Store'
 
 const initState = {
-    size: {width: 500, height: 500},
+    size: {width: 800, height: 800},
     editImage: '',
 };
 
@@ -22,11 +22,11 @@ export default (state = initState, action) => {
             let r = width / height;
             let size = {};
             if (r > 1) {
-                size.width = 500;
-                size.height = 500 / r;
+                size.width = 800;
+                size.height = 800 / r;
             } else {
-                size.height = 500;
-                size.width = 500 * r;
+                size.height = 800;
+                size.width = 800 * r;
             }
             Store.updateCanvasSize(size);
             return {
@@ -44,7 +44,7 @@ export default (state = initState, action) => {
             return state;
         }
         case ActionType.EDIT_DRAG: {
-            Store.dragInCanvas(action.offset);
+            Store.dragInCanvas(action.point, action.offset);
             return state;
         }
         case ActionType.EDIT_UP: {

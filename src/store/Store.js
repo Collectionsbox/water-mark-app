@@ -1,6 +1,5 @@
 import Canvas from '../core/Canvas'
 import WMImage from '../core/WMImage'
-import {ninvoke} from "q";
 
 let canvas = new Canvas();
 let editCanvas = null;
@@ -44,9 +43,9 @@ export default {
     overCanvas: function (point) {
         canvas.mouseOver(point);
     },
-    dragInCanvas: function (offset) {
+    dragInCanvas: function (point, offset) {
         canvas.clear();
-        canvas.drag(offset);
+        canvas.drag(point, offset);
         canvas.draw();
     },
     export: function () {

@@ -36,8 +36,11 @@ class Canvas {
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     }
     draw () {
-        this.sprites.forEach((sprite) => {
+        this.sprites.forEach((sprite, index) => {
             this.drawSprite(sprite);
+            if (this.selectedIndex === index) {
+                this.sprites[index].drawTrack(this.trackView, true, -1);
+            }
         });
     }
     drawSprite(sprite) {
@@ -74,15 +77,20 @@ class Canvas {
             this.sprites[this.selectedIndex].drawTrack(this.trackView, true, this.trackNode);
         }
     }
-    drag (offset) {
+    drag (point, offset) {
         if (this.selectedIndex !== -1) {
             let {width, height} = this.getSize();
             let offsetPoint = {x: offset.x / width, y: offset.y / height};
             let selectedSp = this.sprites[this.selectedIndex];
             if (this.trackNode === Track.Track_NODE.CENTER) {
                 selectedSp.move(offsetPoint);
-            } else if (this.trackNode !== Track.Track_NODE.NONE) {
+            } else if (this.trackNode !== Track.Track_NODE.NONE && this.trackNode !== Track.Track_NODE.ROTATE) {
                 selectedSp.resize(this.trackNode, offsetPoint);
+            } else if (this.trackNode === Track.Track_NODE.ROTATE) {
+                let spRect = selectedSp.getRect({width: width, height: height});
+                let cor = Math.atan2((spRect.y + spRect.height / 2) - point.y, point.x - (spRect.x + spRect.width / 2));
+                let deg = 90 - cor / Math.PI * 180;
+                selectedSp.rotate(deg < 0 ? deg + 360 : deg);
             }
             selectedSp.drawTrack(this.trackView, true, this.trackNode);
         }
@@ -98,10 +106,10 @@ class Canvas {
         for (let i = this.sprites.length - 1; i > -1; i--) {
             let sprite = this.sprites[i];
             this.trackNode = sprite.trackNodePoint(this.trackView, point);
-            if (this.selectedIndex === i && this.trackNode !== -1) {
+            if (this.selectedIndex === i && this.trackNode !== -1 && this.trackNode !== 9) {
                 break;
             }
-            if (!hasFound && this.trackNode !== -1) {
+            if (!hasFound && this.trackNode !== -1 && this.trackNode !== 9) {
                 overSprite = sprite;
                 hasFound = true;
             }

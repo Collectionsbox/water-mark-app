@@ -43,7 +43,12 @@ class WMImage extends Sprite{
         let posY = this.relativeRect.y * height;
         let sizeW = this.relativeRect.w * width;
         let sizeH = this.relativeRect.h * height;
-        ctx.drawImage(this.image, posX, posY, sizeW, sizeH);
+        ctx.save();
+        ctx.translate(posX + sizeW / 2, posY + sizeH / 2);
+        ctx.rotate(this.rotation * Math.PI / 180);
+        ctx.drawImage(this.image, -sizeW / 2, -sizeH / 2, sizeW, sizeH);
+        ctx.translate(-(posX + sizeW / 2), -(posY + sizeH / 2));
+        ctx.restore();
     }
 }
 

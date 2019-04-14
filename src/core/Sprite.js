@@ -1,4 +1,5 @@
 import Track from './Track'
+import Util from "../util/Util";
 
 class Sprite {
     constructor() {
@@ -16,21 +17,36 @@ class Sprite {
     clearRelativeRect () {
         this.relativeRect = null;
     }
-    getRotation () {
-        return this.rotation;
-    }
-    setRotation (deg) {
-        this.rotation = deg;
-    }
     move (offsetPoint) {
         this.relativeRect.x += offsetPoint.x;
         this.relativeRect.y += offsetPoint.y;
     }
+    rotate (deg) {
+        this.rotation = deg;
+    }
     resize (trackNode, offsetPoint, keepRatio = true) {
-        let {x, y} = offsetPoint;
+        let afterOffsetPoint = Util.pointAfterRotation(offsetPoint, this.rotation / 180 * Math.PI);
+        let {x, y} = afterOffsetPoint;
         let r = this.relativeRect.w / this.relativeRect.h;
         let oriW = this.relativeRect.w;
         let oriH = this.relativeRect.h;
+        let oriX = this.relativeRect.x;
+        let oriY = this.relativeRect.y;
+
+        let covertPos = (point, nextPoint) => {
+            let p = Util.pointAfterRotation(point, -this.rotation / 180 * Math.PI);
+            p.x = p.x + (oriX + oriW / 2);
+            p.y = (oriY + oriH / 2) - p.y;
+            let p2 = Util.pointAfterRotation(nextPoint, -this.rotation / 180 * Math.PI);
+            let p3 = {};
+            p3.x = p.x - p2.x;
+            p3.y = p.y + p2.y;
+            return {
+                x: p3.x - this.relativeRect.w / 2,
+                y: p3.y - this.relativeRect.h / 2,
+            }
+        };
+
         switch (trackNode) {
             case 0: {
                 let isAdd = (x < 0 || (x === 0 && y > 0));
@@ -41,8 +57,15 @@ class Sprite {
                     this.relativeRect.w -= x;
                     this.relativeRect.h -= y;
                 }
-                this.relativeRect.x -= (this.relativeRect.w - oriW);
-                this.relativeRect.y -= (this.relativeRect.h - oriH);
+                let pos = covertPos({
+                    x: oriW / 2,
+                    y: -oriH / 2,
+                }, {
+                    x: this.relativeRect.w / 2,
+                    y: -this.relativeRect.h / 2,
+                });
+                this.relativeRect.x = pos.x;
+                this.relativeRect.y = pos.y;
                 break;
             }
             case 1: {
@@ -59,7 +82,15 @@ class Sprite {
                     this.relativeRect.w += x;
                     this.relativeRect.h -= y;
                 }
-                this.relativeRect.y -= (this.relativeRect.h - oriH);
+                let pos = covertPos({
+                    x: -oriW / 2,
+                    y: -oriH / 2,
+                }, {
+                    x: -this.relativeRect.w / 2,
+                    y: -this.relativeRect.h / 2,
+                });
+                this.relativeRect.x = pos.x;
+                this.relativeRect.y = pos.y;
                 break;
             }
             case 3: {
@@ -75,6 +106,15 @@ class Sprite {
                     this.relativeRect.w += x;
                     this.relativeRect.h += y;
                 }
+                let pos = covertPos({
+                    x: -oriW / 2,
+                    y: oriH / 2,
+                }, {
+                    x: -this.relativeRect.w / 2,
+                    y: this.relativeRect.h / 2,
+                });
+                this.relativeRect.x = pos.x;
+                this.relativeRect.y = pos.y;
                 break;
             }
             case 5: {
@@ -90,7 +130,15 @@ class Sprite {
                     this.relativeRect.w -= x;
                     this.relativeRect.h += y;
                 }
-                this.relativeRect.x += x;
+                let pos = covertPos({
+                    x: oriW / 2,
+                    y: oriH / 2,
+                }, {
+                    x: this.relativeRect.w / 2,
+                    y: this.relativeRect.h / 2,
+                });
+                this.relativeRect.x = pos.x;
+                this.relativeRect.y = pos.y;
                 break;
             }
             case 7: {

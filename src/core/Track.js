@@ -19,7 +19,7 @@ class Track {
         this.element.style.setProperty('position', 'absolute');
         for (let key in Track.Track_NODE) {
             let value = Track.Track_NODE[key];
-            if (value >= 0 && value <= 7) {
+            if ((value >= 0 && value <= 7) || value === 9) {
                 let node = null;
                 switch (value) {
                     case 0:
@@ -46,6 +46,9 @@ class Track {
                     case 7:
                         node = this.createTrackNode({x: 0, y: '50%'});
                         break;
+                    case 9:
+                        node = this.createTrackNode({x: '50%', y: '-20px',});
+                        break;
                     default:
                         break;
                 }
@@ -68,7 +71,7 @@ class Track {
         node.style.setProperty('transform', 'translate(-50%, -50%)');
         return node;
     }
-    draw (view, relativeRect, rotation = 0, withNode, activeNode) {
+    draw (view, relativeRect, rotation = 0, withNode, activeNode, hasMiddleNode) {
         view.appendChild(this.element);
         for (let i = 0; i < this.trackNodeCollection.length; i++) {
             this.trackNodeCollection[i].style.setProperty('display', withNode ? 'block' : 'none');
@@ -81,7 +84,7 @@ class Track {
         this.element.style.setProperty('top', y + 'px');
         this.element.style.setProperty('width', width + 'px');
         this.element.style.setProperty('height', height + 'px');
-        this.element.style.setProperty('transform', 'rotate(' + rotation + ')');
+        this.element.style.setProperty('transform', 'rotate(' + rotation + 'deg)');
     }
     clear () {
         if (this.element.parentNode) {
@@ -91,24 +94,33 @@ class Track {
     nodePoint (view, relativeRect, rotation, point) {
         let {x, y, width, height} = this.getRect(view, relativeRect);
         let node = -1;
-        if (this.pointInNode({x: x, y: y}, point)) {
+
+        let tPoint = {
+            x: point.x - x - width / 2,
+            y: y + height / 2 - point.y,
+        };
+        let afterPoint = Util.pointAfterRotation(tPoint, rotation / 180 * Math.PI);
+
+        if (this.pointInNode({x: -width / 2, y: height / 2}, afterPoint)) {
             node = 0;
-        } else if (this.pointInNode({x: x + width / 2, y: y}, point)) {
+        } else if (this.pointInNode({x: 0, y: height / 2}, afterPoint)) {
             node = 1;
-        } else if (this.pointInNode({x: x + width, y: y}, point)) {
+        } else if (this.pointInNode({x: width / 2, y: height / 2}, afterPoint)) {
             node = 2;
-        } else if (this.pointInNode({x: x + width, y: y + height / 2}, point)) {
+        } else if (this.pointInNode({x: width / 2, y: 0}, afterPoint)) {
             node = 3;
-        } else if (this.pointInNode({x: x + width, y: y + height}, point)) {
+        } else if (this.pointInNode({x: width / 2, y: -height / 2}, afterPoint)) {
             node = 4;
-        } else if (this.pointInNode({x: x + width / 2, y: y + height}, point)) {
+        } else if (this.pointInNode({x: 0, y: -height / 2}, afterPoint)) {
             node = 5;
-        } else if (this.pointInNode({x: x, y: y + height}, point)) {
+        } else if (this.pointInNode({x: -width / 2, y: -height / 2}, afterPoint)) {
             node = 6;
-        } else if (this.pointInNode({x: x, y: y + height / 2}, point)) {
+        } else if (this.pointInNode({x: -width / 2, y: 0}, afterPoint)) {
             node = 7;
-        } else if (Util.isPointInRect(point, {x, y, width, height}, point)) {
+        } else if (Util.isPointInRect(afterPoint, {x: -width / 2, y: -height / 2, width, height}, afterPoint)) {
             node = 8;
+        } else if (this.pointInNode({x: 0, y: height / 2 + 20}, afterPoint)) {
+            node = 9;
         } else {
             node = -1;
         }
@@ -118,7 +130,6 @@ class Track {
         let {x, y} = pos;
         return Util.isPointInRect(point, {x: x - this.trackNodeRadius, y: y - this.trackNodeRadius, width: this.trackNodeRadius * 2, height: this.trackNodeRadius * 2})
     }
-
     getRect (view, relativeRect) {
         let {x, y, w, h} = relativeRect;
         let {width, height} = view.getBoundingClientRect();
@@ -141,6 +152,7 @@ Track.Track_NODE = {
     LEFT_BOTTOM: 6,
     LEFT_CENTER: 7,
     CENTER: 8,
+    ROTATE: 9,
     NONE: -1,
 };
 

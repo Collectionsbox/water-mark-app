@@ -37,9 +37,10 @@ export const dropAction = (point) => {
         point: point,
     }
 };
-export const dragAction = (offset) => {
+export const dragAction = (point, offset) => {
     return {
         type: ActionType.EDIT_DRAG,
+        point: point,
         offset: offset,
     }
 };
